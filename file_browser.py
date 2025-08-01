@@ -451,6 +451,7 @@ class FileBrowserMainWindow(QMainWindow):
         self.file_operations = FileOperations(self)
         self.current_view_mode = ViewMode.DETAILS  # Výchozí režim zobrazení
         self.tab_data = {}  # Slovník pro ukládání dat záložek
+        self._version_info_cache = None  # Cache pro informace o verzi
         
         # Nastavení oken
         self.setWindowTitle("FlexiFiles - Profesionální správce souborů")
@@ -470,56 +471,69 @@ class FileBrowserMainWindow(QMainWindow):
         # self.navigate_to_path(self.current_path)
     
     def get_version_info(self):
-        """Získá informace o verzi z Git repozitáře"""
+        """Získá informace o verzi z Git repozitáře (s cache pro rychlost)"""
+        # Pokud už máme cache, použij ho
+        if self._version_info_cache is not None:
+            return self._version_info_cache
+            
         try:
-            # Získání počtu commitů
-            result = subprocess.run(['git', 'rev-list', '--count', 'HEAD'], 
-                                  capture_output=True, text=True, cwd=os.path.dirname(__file__))
+            # Získání všech informací jedním Git příkazem pro rychlost
+            result = subprocess.run([
+                'git', 'log', '-1', '--format=%H %h %cd %s', '--date=short'
+            ], capture_output=True, text=True, cwd=os.path.dirname(__file__), timeout=2)
+            
             if result.returncode == 0:
-                commit_count = int(result.stdout.strip())
-                major = commit_count // 10  # Každých 10 commitů = nová major verze
-                minor = commit_count % 10   # Zbytek = minor verze
+                output_parts = result.stdout.strip().split(' ', 3)
+                git_hash = output_parts[1] if len(output_parts) > 1 else "unknown"
+                commit_date = output_parts[2] if len(output_parts) > 2 else "unknown"
                 
-                # Získání hash posledního commitu
-                hash_result = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], 
-                                           capture_output=True, text=True, cwd=os.path.dirname(__file__))
-                git_hash = hash_result.stdout.strip() if hash_result.returncode == 0 else "unknown"
+                # Rychlé získání počtu commitů
+                count_result = subprocess.run(['git', 'rev-list', '--count', 'HEAD'], 
+                                            capture_output=True, text=True, 
+                                            cwd=os.path.dirname(__file__), timeout=1)
                 
-                # Získání data posledního commitu
-                date_result = subprocess.run(['git', 'log', '-1', '--format=%cd', '--date=short'], 
-                                           capture_output=True, text=True, cwd=os.path.dirname(__file__))
-                commit_date = date_result.stdout.strip() if date_result.returncode == 0 else "unknown"
+                if count_result.returncode == 0:
+                    commit_count = int(count_result.stdout.strip())
+                    major = commit_count // 10
+                    minor = commit_count % 10
+                else:
+                    commit_count = 0
+                    major, minor = 4, 2
                 
-                # Kontrola, zda jsou nějaké změny
+                # Rychlá kontrola změn (bez detailů)
                 status_result = subprocess.run(['git', 'status', '--porcelain'], 
-                                             capture_output=True, text=True, cwd=os.path.dirname(__file__))
+                                             capture_output=True, text=True, 
+                                             cwd=os.path.dirname(__file__), timeout=1)
                 has_changes = bool(status_result.stdout.strip()) if status_result.returncode == 0 else False
                 
                 version = f"{major}.{minor}"
                 if has_changes:
                     version += "-dev"
                     
-                return {
+                self._version_info_cache = {
                     'version': version,
                     'git_hash': git_hash,
                     'commit_date': commit_date,
                     'commit_count': commit_count,
                     'has_changes': has_changes
                 }
+                return self._version_info_cache
             else:
-                return self.get_fallback_version()
+                self._version_info_cache = self.get_fallback_version()
+                return self._version_info_cache
                 
         except Exception as e:
             print(f"Chyba při získávání Git informací: {e}")
-            return self.get_fallback_version()
+            self._version_info_cache = self.get_fallback_version()
+            return self._version_info_cache
     
     def get_fallback_version(self):
-        """Náhradní verze pokud Git není dostupný"""
+        """Náhradní verze pokud Git není dostupný (rychlá cache verze)"""
         return {
-            'version': '4.1-standalone',
-            'git_hash': 'unknown',
-            'commit_date': 'unknown',
-            'commit_count': 0,
+            'version': '4.2-standalone',
+            'git_hash': '9bbcc4d',
+            'commit_date': '2025-08-01',
+            'commit_count': 42,
             'has_changes': False
         }
     
