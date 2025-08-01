@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignore nested git repositories
+flexifiles-file-manager/
+
 # Distribution / packaging
 .Python
 build/
