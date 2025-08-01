@@ -488,10 +488,10 @@ class FileBrowserMainWindow(QMainWindow):
     def get_fallback_version(self):
         """Náhradní verze pokud Git není dostupný (rychlá cache verze)"""
         return {
-            'version': '4.2-standalone',
-            'git_hash': '9bbcc4d',
+            'version': '4.2',
+            'git_hash': 'f92006d',
             'commit_date': '2025-08-01',
-            'commit_count': 42,
+            'commit_count': 46,
             'has_changes': False
         }
     
@@ -527,7 +527,7 @@ class FileBrowserMainWindow(QMainWindow):
                     'version': '4.2',
                     'git_hash': git_hash,
                     'commit_date': commit_date,
-                    'commit_count': 44,  # Přibližná hodnota
+                    'commit_count': 46,  # Aktualizovaná hodnota
                     'has_changes': False
                 }
             else:
