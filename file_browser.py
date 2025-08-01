@@ -467,83 +467,74 @@ class FileBrowserMainWindow(QMainWindow):
         # Vytvoření GUI komponent
         self.setup_ui()
         
+        # Předběžné načtení informací o verzi v pozadí (pro rychlé zobrazení "O aplikaci")
+        self.preload_version_info()
+        
         # Načtení výchozí cesty už se děje v create_new_tab
         # self.navigate_to_path(self.current_path)
-        
-        # Načtení informací o verzi na pozadí (bez blokování UI)
-        self.load_version_info_async()
     
-    def load_version_info_async(self):
-        """Načte informace o verzi na pozadí pomocí QTimer"""
-        # Vytvoříme timer pro zpožděné načtení (po 100ms, kdy už je UI připraveno)
-        self.version_timer = QTimer()
-        self.version_timer.timeout.connect(self._load_version_info_background)
-        self.version_timer.setSingleShot(True)
-        self.version_timer.start(100)  # 100ms delay
+    def get_version_info(self):
+        """Získá informace o verzi z Git repozitáře (s předem načtenou cache)"""
+        # Pokud už máme cache, použij ho OKAMŽITĚ - bez jakýchkoli Git příkazů!
+        if self._version_info_cache is not None:
+            return self._version_info_cache
+            
+        # Fallback pouze pokud cache ještě nebyla načtena
+        # (tohle by se nemělo stát, protože cache se načítá při startu)
+        print("VAROVÁNÍ: Cache nebyla načtena, používám fallback")
+        self._version_info_cache = self.get_fallback_version()
+        return self._version_info_cache
     
-    def _load_version_info_background(self):
-        """Načte cache na pozadí bez blokování UI"""
+    def get_fallback_version(self):
+        """Náhradní verze pokud Git není dostupný (rychlá cache verze)"""
+        return {
+            'version': '4.2-standalone',
+            'git_hash': '9bbcc4d',
+            'commit_date': '2025-08-01',
+            'commit_count': 42,
+            'has_changes': False
+        }
+    
+    def preload_version_info(self):
+        """Načte informace o verzi v pozadí při spuštění aplikace"""
         try:
-            # Pokud už cache existuje, nic nedělej
+            # Spustí načítání v pozadí pomocí QTimer (neblokuje UI)
+            timer = QTimer()
+            timer.singleShot(100, self._load_version_in_background)  # 100ms zpoždění po startu
+        except Exception:
+            # Pokud se nepovede, použij fallback
+            self._version_info_cache = self.get_fallback_version()
+    
+    def _load_version_in_background(self):
+        """Načte Git informace v pozadí (voláno pomocí QTimer)"""
+        try:
+            # Pokračuj pouze pokud cache ještě není naplněna
             if self._version_info_cache is not None:
                 return
                 
-            # Rychlé načtení s timeout pro případ problémů
+            # Rychlé načtení jen základních informací
             result = subprocess.run([
-                'git', 'log', '-1', '--format=%H %h %cd %s', '--date=short'
-            ], capture_output=True, text=True, cwd=os.path.dirname(__file__), timeout=0.5)
+                'git', 'log', '-1', '--format=%h %cd', '--date=short'
+            ], capture_output=True, text=True, cwd=os.path.dirname(__file__), timeout=1)
             
             if result.returncode == 0:
-                output_parts = result.stdout.strip().split(' ', 3)
-                git_hash = output_parts[1] if len(output_parts) > 1 else "3f9dc2d"
-                commit_date = output_parts[2] if len(output_parts) > 2 else "2025-08-01"
+                output_parts = result.stdout.strip().split(' ', 1)
+                git_hash = output_parts[0] if len(output_parts) > 0 else "3f9dc2d"
+                commit_date = output_parts[1] if len(output_parts) > 1 else "2025-08-01"
                 
-                # Rychlé získání počtu commitů
-                count_result = subprocess.run(['git', 'rev-list', '--count', 'HEAD'], 
-                                            capture_output=True, text=True, 
-                                            cwd=os.path.dirname(__file__), timeout=0.5)
-                
-                if count_result.returncode == 0:
-                    commit_count = int(count_result.stdout.strip())
-                    major = commit_count // 10
-                    minor = commit_count % 10
-                else:
-                    commit_count = 44  # Přibližný počet
-                    major, minor = 4, 4
-                
-                version = f"{major}.{minor}"
-                
+                # Statické hodnoty pro rychlost
                 self._version_info_cache = {
-                    'version': version,
+                    'version': '4.2',
                     'git_hash': git_hash,
                     'commit_date': commit_date,
-                    'commit_count': commit_count,
+                    'commit_count': 44,  # Přibližná hodnota
                     'has_changes': False
                 }
             else:
                 self._version_info_cache = self.get_fallback_version()
                 
         except Exception:
-            # Při jakékoli chybě použij fallback
             self._version_info_cache = self.get_fallback_version()
-    
-    def get_version_info(self):
-        """Získá informace o verzi z cache (okamžitě bez čekání)"""
-        # Pokud cache není připravena, vrať okamžitě fallback
-        if self._version_info_cache is None:
-            return self.get_fallback_version()
-        
-        return self._version_info_cache
-    
-    def get_fallback_version(self):
-        """Náhradní verze pokud Git není dostupný (rychlá cache verze)"""
-        return {
-            'version': '4.4-standalone',
-            'git_hash': '3f9dc2d',
-            'commit_date': '2025-08-01',
-            'commit_count': 44,
-            'has_changes': False
-        }
     
     def set_application_icon(self):
         """Nastaví ikonu aplikace"""
