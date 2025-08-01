@@ -1,8 +1,8 @@
 """
-Profesionální File Browser v Pythonu s PyQt6
-==============================================
+FlexiFiles - Profesionální správce souborů v Pythonu s PyQt6
+============================================================
 
-Tento soubor obsahuje kompletní implementaci moderního file browseru
+Tento soubor obsahuje kompletní implementaci moderního správce souborů
 optimalizovaného pro Windows s využitím knihovny PyQt6.
 
 Instalace potřebných knihoven:
@@ -449,7 +449,7 @@ class FileBrowserMainWindow(QMainWindow):
         self.tab_data = {}  # Slovník pro ukládání dat záložek
         
         # Nastavení oken
-        self.setWindowTitle("Profesionální File Browser")
+        self.setWindowTitle("FlexiFiles - Profesionální správce souborů")
         self.setGeometry(100, 100, 1200, 800)
         
         # Vytvoření file system modelu

@@ -1,6 +1,16 @@
-# Profesionální File Browser v Pythonu
+# FlexiFiles - Profesionální správce souborů
 
-Moderní a plně funkční file browser aplikace vytvořená v Pythonu s využitím PyQt6 GUI frameworku, optimalizovaná pro operační systém Windows.
+Moderní a plně funkční správce soubo### 📁 Dostupné soubory
+
+### Spustitelné soubory (.exe)
+- **FlexiFiles.exe** - Nejnovější verze s všemi funkcemi (~36 MB) ⭐ **Doporučeno**
+- **File Browser.exe** - Starší verze (~35 MB)
+- **File Browser v2.exe** - Starší verze s informačním panelem (~36 MB)
+
+### Vývojové soubory
+- **file_browser.py** - Hlavní zdrojový kód
+- **requirements.txt** - Python závislosti
+- **FlexiFiles.spec** / **FlexiFiles v2.spec** - PyInstaller konfiguracený v Pythonu s využitím PyQt6 GUI frameworku, optimalizovaný pro operační systém Windows.
 
 ## ✨ Nové funkce - verze 2.0
 
@@ -61,9 +71,18 @@ pip install PyQt6
 
 ## Spuštění
 
+### Možnost 1: Python skript
 ```bash
 python file_browser.py
 ```
+
+### Možnost 2: Batch soubor
+```bash
+start_flexifiles.bat
+```
+
+### Možnost 3: Executable soubor
+Stáhněte si `FlexiFiles.exe` ze složky `dist/` a spusťte dvojklikem.
 
 ## Ovládání
 
