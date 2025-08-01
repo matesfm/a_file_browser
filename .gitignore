@@ -216,8 +216,17 @@ flexifiles_icon.png
 flexifiles_icon.ico
 flexifiles_icon.svg
 
-# Custom project exclusions
+# Development and testing
 pomucky/
+
+# Release artifacts
+*.zip
+*.tar.gz
+
+# IDE specific
+.idea/
+*.sublime-*
+*.code-workspace
 
 # Logs and temporary files
 *.log

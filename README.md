@@ -1,6 +1,44 @@
 # FlexiFiles - Profesionální správce souborů
 
-Moderní a plně funkční správce soubo### 📁 Dostupné soubory
+![FlexiFiles Logo](flexifiles_icon.png)
+
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
+[![PyQt6](https://img.shields.io/badge/PyQt6-6.4+-green.svg)](https://www.riverbankcomputing.com/software/pyqt/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](#)
+
+Moderní a plně funkční správce souborů v Pythonu s využitím PyQt6 GUI frameworku, optimalizovaný pro operační systém Windows.
+
+## 🚀 Rychlý start
+
+### 📋 Požadavky
+- **Python 3.8+**
+- **Windows 10/11** (testováno)
+- **PyQt6** (automaticky nainstalováno)
+
+### 💾 Instalace
+
+#### Možnost 1: Stažení exe souboru (Doporučeno)
+1. Stáhněte `FlexiFiles_v3.exe` z [Releases](../../releases)
+2. Spusťte soubor dvojklikem - žádná instalace není potřeba
+
+#### Možnost 2: Spuštění ze zdrojového kódu
+```bash
+# Klonování repository
+git clone https://github.com/[username]/flexifiles.git
+cd flexifiles
+
+# Vytvoření virtuálního prostředí
+python -m venv .venv
+.venv\Scripts\activate
+
+# Instalace závislostí
+pip install -r requirements.txt
+
+# Spuštění aplikace
+python file_browser.py
+```### 📁 Dostupné soubory
 
 ### Spustitelné soubory (.exe)
 - **FlexiFiles_v3.exe** - Nejnovější verze s vlastní ikonou a všemi funkcemi (~36 MB) ⭐ **Doporučeno**
@@ -160,10 +198,45 @@ Aplikace je navržena modulárně a lze ji snadno rozšířit o:
 - Více panelové zobrazení
 - Integraci s cloud úložišti
 
-## Licence
+## 🛣️ Roadmap
 
-Tento projekt je open source a může být volně používán a modifikován.
+### 🔜 Příští verze (v4.0)
+- [ ] **Vyhledávání souborů** - Rychlé hledání podle názvu a obsahu
+- [ ] **Copy/Cut/Paste** - Kompletní správa schránky pro soubory
+- [ ] **Drag & Drop** - Intuitivní přesouvání souborů
+- [ ] **Záložky složek** - Rychlý přístup k oblíbeným adresářům
+- [ ] **Dualní panel** - Dva panely pro efektivnější práci
+- [ ] **Archiv podpora** - ZIP, RAR, 7Z podpora
+- [ ] **Cloud integrace** - OneDrive, Google Drive
+- [ ] **Témata** - Tmavý/světlý režim
 
-## Autor
+### 🔮 Budoucnost
+- [ ] **Plugin systém** - Rozšiřitelnost třetími stranami
+- [ ] **Síťové disky** - FTP, SFTP, WebDAV
+- [ ] **Pokročilé náhledy** - Video, audio, dokumenty
+- [ ] **Batch operace** - Hromadné přejmenování, konverze
 
-Vytvořeno s využitím GitHub Copilot pro demonstraci moderních Python GUI aplikací.
+## 🤝 Přispívání
+
+Příspěvky jsou vítány! Přečtěte si [CONTRIBUTING.md](CONTRIBUTING.md) pro více informací o tom, jak přispět do projektu.
+
+## 📜 Licence
+
+Tento projekt je licencován pod [MIT License](LICENSE) - viz LICENSE soubor pro detaily.
+
+## 📞 Podpora
+
+- 🐛 **Bug reports**: [GitHub Issues](../../issues)
+- 💡 **Feature requests**: [GitHub Issues](../../issues)
+- 📧 **Email**: [Vytvořte issue](../../issues/new)
+- 📚 **Dokumentace**: [Wiki](../../wiki)
+
+## 🙏 Poděkování
+
+- **PyQt6** - Za skvělý GUI framework
+- **GitHub Copilot** - Za asistenci při vývoji
+- **Komunita** - Za zpětnou vazbu a návrhy
+
+---
+
+**FlexiFiles** - Flexibilní správce souborů pro Windows 🚀
