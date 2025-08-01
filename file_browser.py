@@ -469,71 +469,79 @@ class FileBrowserMainWindow(QMainWindow):
         
         # Načtení výchozí cesty už se děje v create_new_tab
         # self.navigate_to_path(self.current_path)
+        
+        # Načtení informací o verzi na pozadí (bez blokování UI)
+        self.load_version_info_async()
     
-    def get_version_info(self):
-        """Získá informace o verzi z Git repozitáře (s cache pro rychlost)"""
-        # Pokud už máme cache, použij ho
-        if self._version_info_cache is not None:
-            return self._version_info_cache
-            
+    def load_version_info_async(self):
+        """Načte informace o verzi na pozadí pomocí QTimer"""
+        # Vytvoříme timer pro zpožděné načtení (po 100ms, kdy už je UI připraveno)
+        self.version_timer = QTimer()
+        self.version_timer.timeout.connect(self._load_version_info_background)
+        self.version_timer.setSingleShot(True)
+        self.version_timer.start(100)  # 100ms delay
+    
+    def _load_version_info_background(self):
+        """Načte cache na pozadí bez blokování UI"""
         try:
-            # Získání všech informací jedním Git příkazem pro rychlost
+            # Pokud už cache existuje, nic nedělej
+            if self._version_info_cache is not None:
+                return
+                
+            # Rychlé načtení s timeout pro případ problémů
             result = subprocess.run([
                 'git', 'log', '-1', '--format=%H %h %cd %s', '--date=short'
-            ], capture_output=True, text=True, cwd=os.path.dirname(__file__), timeout=2)
+            ], capture_output=True, text=True, cwd=os.path.dirname(__file__), timeout=0.5)
             
             if result.returncode == 0:
                 output_parts = result.stdout.strip().split(' ', 3)
-                git_hash = output_parts[1] if len(output_parts) > 1 else "unknown"
-                commit_date = output_parts[2] if len(output_parts) > 2 else "unknown"
+                git_hash = output_parts[1] if len(output_parts) > 1 else "3f9dc2d"
+                commit_date = output_parts[2] if len(output_parts) > 2 else "2025-08-01"
                 
                 # Rychlé získání počtu commitů
                 count_result = subprocess.run(['git', 'rev-list', '--count', 'HEAD'], 
                                             capture_output=True, text=True, 
-                                            cwd=os.path.dirname(__file__), timeout=1)
+                                            cwd=os.path.dirname(__file__), timeout=0.5)
                 
                 if count_result.returncode == 0:
                     commit_count = int(count_result.stdout.strip())
                     major = commit_count // 10
                     minor = commit_count % 10
                 else:
-                    commit_count = 0
-                    major, minor = 4, 2
-                
-                # Rychlá kontrola změn (bez detailů)
-                status_result = subprocess.run(['git', 'status', '--porcelain'], 
-                                             capture_output=True, text=True, 
-                                             cwd=os.path.dirname(__file__), timeout=1)
-                has_changes = bool(status_result.stdout.strip()) if status_result.returncode == 0 else False
+                    commit_count = 44  # Přibližný počet
+                    major, minor = 4, 4
                 
                 version = f"{major}.{minor}"
-                if has_changes:
-                    version += "-dev"
-                    
+                
                 self._version_info_cache = {
                     'version': version,
                     'git_hash': git_hash,
                     'commit_date': commit_date,
                     'commit_count': commit_count,
-                    'has_changes': has_changes
+                    'has_changes': False
                 }
-                return self._version_info_cache
             else:
                 self._version_info_cache = self.get_fallback_version()
-                return self._version_info_cache
                 
-        except Exception as e:
-            print(f"Chyba při získávání Git informací: {e}")
+        except Exception:
+            # Při jakékoli chybě použij fallback
             self._version_info_cache = self.get_fallback_version()
-            return self._version_info_cache
+    
+    def get_version_info(self):
+        """Získá informace o verzi z cache (okamžitě bez čekání)"""
+        # Pokud cache není připravena, vrať okamžitě fallback
+        if self._version_info_cache is None:
+            return self.get_fallback_version()
+        
+        return self._version_info_cache
     
     def get_fallback_version(self):
         """Náhradní verze pokud Git není dostupný (rychlá cache verze)"""
         return {
-            'version': '4.2-standalone',
-            'git_hash': '9bbcc4d',
+            'version': '4.4-standalone',
+            'git_hash': '3f9dc2d',
             'commit_date': '2025-08-01',
-            'commit_count': 42,
+            'commit_count': 44,
             'has_changes': False
         }
     
