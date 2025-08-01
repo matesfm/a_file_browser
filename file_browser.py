@@ -498,6 +498,9 @@ class FileBrowserMainWindow(QMainWindow):
         # Hlavní layout
         main_layout = QVBoxLayout(central_widget)
         
+        # Menu bar
+        self.create_menu_bar()
+        
         # Toolbar s navigačními tlačítky
         self.create_toolbar()
         
@@ -797,6 +800,28 @@ class FileBrowserMainWindow(QMainWindow):
         else:
             return tab_data['icon_view']
     
+    def create_menu_bar(self):
+        """Vytvoří menu bar s nápovědou"""
+        menubar = self.menuBar()
+        
+        # Menu Nápověda
+        help_menu = menubar.addMenu('&Nápověda')
+        
+        # Akce Nápověda
+        help_action = QAction('&Nápověda', self)
+        help_action.setShortcut(QKeySequence('F1'))
+        help_action.setStatusTip('Zobrazí nápovědu k aplikaci')
+        help_action.triggered.connect(self.show_help)
+        help_menu.addAction(help_action)
+        
+        help_menu.addSeparator()
+        
+        # Akce O aplikaci
+        about_action = QAction('&O aplikaci', self)
+        about_action.setStatusTip('Informace o aplikaci FlexiFiles')
+        about_action.triggered.connect(self.show_about)
+        help_menu.addAction(about_action)
+    
     def create_toolbar(self):
         """Vytvoří toolbar s akcemi"""
         toolbar = QToolBar()
@@ -823,7 +848,7 @@ class FileBrowserMainWindow(QMainWindow):
         
         # Přepínání informačního panelu
         info_panel_action = QAction("ℹ️ Informační panel", self)
-        info_panel_action.setShortcut(QKeySequence("F1"))
+        info_panel_action.setShortcut(QKeySequence("Ctrl+I"))
         info_panel_action.triggered.connect(self.toggle_info_panel)
         toolbar.addAction(info_panel_action)
     
@@ -1303,6 +1328,115 @@ Změněno: {modified}"""
             info_panel.hide()
         else:
             info_panel.show()
+    
+    def show_help(self):
+        """Zobrazí nápovědu k aplikaci"""
+        help_text = """
+<h2>FlexiFiles - Nápověda</h2>
+
+<h3>🔧 Základní ovládání</h3>
+<ul>
+<li><b>Navigace:</b> Klikněte na složku pro otevření, nebo použijte adresní řádek</li>
+<li><b>Zpět/Vpřed:</b> Tlačítka ◀ ▶ nebo Alt+← Alt+→</li>
+<li><b>Nahoru:</b> Tlačítko ↑ nebo Alt+↑</li>
+<li><b>Obnovit:</b> Tlačítko 🔄 nebo F5</li>
+</ul>
+
+<h3>📁 Operace se soubory</h3>
+<ul>
+<li><b>Otevřít:</b> Dvojité kliknutí na soubor</li>
+<li><b>Přejmenovat:</b> Pravé tlačítko → Přejmenovat</li>
+<li><b>Smazat:</b> Pravé tlačítko → Smazat nebo klávesa Delete</li>
+<li><b>Nová složka:</b> Ctrl+Shift+N</li>
+<li><b>Vlastnosti:</b> Pravé tlačítko → Vlastnosti</li>
+</ul>
+
+<h3>🔖 Záložky</h3>
+<ul>
+<li><b>Nová záložka:</b> Ctrl+T</li>
+<li><b>Zavřít záložku:</b> Kliknutí na ×</li>
+<li><b>Přepínat záložky:</b> Ctrl+Tab</li>
+</ul>
+
+<h3>👁️ Zobrazení</h3>
+<ul>
+<li><b>Přepínání režimů:</b> Tlačítko 🔄 Přepnout zobrazení</li>
+<li><b>Informační panel:</b> Ctrl+I nebo tlačítko ℹ️</li>
+<li><b>Skrytí/zobrazení panelů:</b> Přetahování hranic</li>
+</ul>
+
+<h3>⌨️ Klávesové zkratky</h3>
+<ul>
+<li><b>F1:</b> Nápověda</li>
+<li><b>F5:</b> Obnovit</li>
+<li><b>Ctrl+T:</b> Nová záložka</li>
+<li><b>Ctrl+Shift+N:</b> Nová složka</li>
+<li><b>Ctrl+I:</b> Informační panel</li>
+<li><b>Delete:</b> Smazat vybranou položku</li>
+<li><b>Enter:</b> Otevřít vybranou položku</li>
+</ul>
+        """
+        
+        help_dialog = QMessageBox(self)
+        help_dialog.setWindowTitle("FlexiFiles - Nápověda")
+        help_dialog.setTextFormat(Qt.TextFormat.RichText)
+        help_dialog.setText(help_text)
+        help_dialog.setIcon(QMessageBox.Icon.Information)
+        help_dialog.exec()
+    
+    def show_about(self):
+        """Zobrazí informace o aplikaci"""
+        about_text = """
+<h2>FlexiFiles</h2>
+<h3>Profesionální správce souborů</h3>
+
+<p><b>Verze:</b> 1.0.0</p>
+<p><b>Datum:</b> Srpen 2025</p>
+
+<h4>🌟 Funkce:</h4>
+<ul>
+<li>Moderní uživatelské rozhraní s PyQt6</li>
+<li>Podpora záložek pro efektivní práci</li>
+<li>Tři režimy zobrazení (Podrobnosti, Seznam, Ikony)</li>
+<li>Informační panel s detaily souborů</li>
+<li>Náhledy obrázků</li>
+<li>Statistiky složek</li>
+<li>Klávesové zkratky</li>
+<li>Kontextová menu</li>
+</ul>
+
+<h4>🛠️ Technologie:</h4>
+<ul>
+<li><b>Python:</b> Programovací jazyk</li>
+<li><b>PyQt6:</b> GUI framework</li>
+<li><b>Windows:</b> Optimalizováno pro Windows</li>
+</ul>
+
+<h4>📄 Licence:</h4>
+<p>MIT License - Open Source software</p>
+
+<h4>👨‍💻 Autor:</h4>
+<p>Vytvořeno pomocí GitHub Copilot</p>
+
+<p><i>FlexiFiles je moderní, rychlý a intuitivní správce souborů<br>
+navržený pro zvýšení produktivity při práci se soubory.</i></p>
+        """
+        
+        about_dialog = QMessageBox(self)
+        about_dialog.setWindowTitle("O aplikaci FlexiFiles")
+        about_dialog.setTextFormat(Qt.TextFormat.RichText)
+        about_dialog.setText(about_text)
+        about_dialog.setIcon(QMessageBox.Icon.Information)
+        
+        # Nastavení ikony aplikace v dialogu
+        try:
+            icon_path = os.path.join(os.path.dirname(__file__), 'flexifiles_icon.png')
+            if os.path.exists(icon_path):
+                about_dialog.setWindowIcon(QIcon(icon_path))
+        except Exception:
+            pass
+            
+        about_dialog.exec()
 
 
 def main():
