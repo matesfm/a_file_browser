@@ -3,7 +3,8 @@
 Moderní a plně funkční správce soubo### 📁 Dostupné soubory
 
 ### Spustitelné soubory (.exe)
-- **FlexiFiles.exe** - Nejnovější verze s všemi funkcemi (~36 MB) ⭐ **Doporučeno**
+- **FlexiFiles_v3.exe** - Nejnovější verze s vlastní ikonou a všemi funkcemi (~36 MB) ⭐ **Doporučeno**
+- **FlexiFiles.exe** - Verze s všemi funkcemi (~36 MB)
 - **File Browser.exe** - Starší verze (~35 MB)
 - **File Browser v2.exe** - Starší verze s informačním panelem (~36 MB)
 
@@ -82,7 +83,7 @@ start_flexifiles.bat
 ```
 
 ### Možnost 3: Executable soubor
-Stáhněte si `FlexiFiles.exe` ze složky `dist/` a spusťte dvojklikem.
+Stáhněte si `FlexiFiles_v3.exe` ze složky `dist/` a spusťte dvojklikem.
 
 ## Ovládání
 

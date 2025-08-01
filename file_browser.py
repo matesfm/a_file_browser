@@ -26,7 +26,7 @@ from PyQt6.QtWidgets import (
     QTreeView, QTableView, QLineEdit, QPushButton, QSplitter,
     QStatusBar, QMenu, QMessageBox, QInputDialog, QHeaderView,
     QAbstractItemView, QToolBar, QFileDialog, QListView, QTabWidget, QStyleFactory,
-    QLabel, QScrollArea, QFrame, QGridLayout, QProgressBar
+    QLabel, QScrollArea, QFrame, QGridLayout, QProgressBar, QStyle
 )
 from PyQt6.QtCore import (
     Qt, QDir, QModelIndex, QTimer,
@@ -452,6 +452,9 @@ class FileBrowserMainWindow(QMainWindow):
         self.setWindowTitle("FlexiFiles - Profesionální správce souborů")
         self.setGeometry(100, 100, 1200, 800)
         
+        # Nastavení ikony aplikace
+        self.set_application_icon()
+        
         # Vytvoření file system modelu
         self.file_model = QFileSystemModel()
         self.file_model.setRootPath(QDir.rootPath())
@@ -461,6 +464,31 @@ class FileBrowserMainWindow(QMainWindow):
         
         # Načtení výchozí cesty už se děje v create_new_tab
         # self.navigate_to_path(self.current_path)
+    
+    def set_application_icon(self):
+        """Nastaví ikonu aplikace"""
+        try:
+            # Cesta k vlastní ikoně (pokud existuje)
+            icon_paths = [
+                os.path.join(os.path.dirname(__file__), 'flexifiles_icon.png'),
+                os.path.join(os.path.dirname(__file__), 'flexifiles_icon.ico')
+            ]
+            
+            app_icon = None
+            for icon_path in icon_paths:
+                if os.path.exists(icon_path):
+                    app_icon = QIcon(icon_path)
+                    break
+            
+            if app_icon is None:
+                # Použít standardní ikonu složky jako náhradní řešení
+                app_icon = self.style().standardIcon(QStyle.StandardPixmap.SP_DirIcon)
+            
+            # Nastavit ikonu pro okno
+            self.setWindowIcon(app_icon)
+            
+        except Exception as e:
+            print(f"Nepodařilo se nastavit ikonu aplikace: {e}")
     
     def setup_ui(self):
         """Vytvoří uživatelské rozhraní"""
