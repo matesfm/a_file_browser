@@ -208,6 +208,9 @@ dist/
 # Executable files
 *.exe
 
+# Batch files (for development only)
+*.bat
+
 # Custom project exclusions
 pomucky/
 
