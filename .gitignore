@@ -211,6 +211,11 @@ dist/
 # Batch files (for development only)
 *.bat
 
+# Icon files (generated)
+flexifiles_icon.png
+flexifiles_icon.ico
+flexifiles_icon.svg
+
 # Custom project exclusions
 pomucky/
 
