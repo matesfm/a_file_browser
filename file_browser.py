@@ -562,25 +562,14 @@ class FileBrowserMainWindow(QMainWindow):
         # Toolbar s navigačními tlačítky
         self.create_toolbar()
         
-        # Navigační panel s adresním řádkem
+        # Navigační panel pouze s adresním řádkem
         nav_layout = QHBoxLayout()
-        
-        # Navigační tlačítka
-        self.back_button = QPushButton("◀ Zpět")
-        self.back_button.setEnabled(False)
-        self.forward_button = QPushButton("Vpřed ▶")
-        self.forward_button.setEnabled(False)
-        self.up_button = QPushButton("↑ Nahoru")
-        self.refresh_button = QPushButton("🔄 Obnovit")
         
         # Adresní řádek
         self.address_bar = QLineEdit()
         self.address_bar.setPlaceholderText("Zadejte cestu...")
         
-        nav_layout.addWidget(self.back_button)
-        nav_layout.addWidget(self.forward_button)
-        nav_layout.addWidget(self.up_button)
-        nav_layout.addWidget(self.refresh_button)
+        nav_layout.addWidget(QLabel("Cesta:"))
         nav_layout.addWidget(self.address_bar)
         
         main_layout.addLayout(nav_layout)
@@ -596,11 +585,7 @@ class FileBrowserMainWindow(QMainWindow):
         
         main_layout.addWidget(self.tab_widget)
         
-        # Propojení signálů pro navigační tlačítka
-        self.back_button.clicked.connect(self.go_back)
-        self.forward_button.clicked.connect(self.go_forward)
-        self.up_button.clicked.connect(self.go_up)
-        self.refresh_button.clicked.connect(self.refresh_current_view)
+        # Propojení signálů pro adresní řádek
         self.address_bar.returnPressed.connect(self.navigate_from_address_bar)
         
         # Propojení file operations
@@ -634,6 +619,62 @@ class FileBrowserMainWindow(QMainWindow):
         middle_widget = QWidget()
         middle_layout = QVBoxLayout(middle_widget)
         middle_layout.setContentsMargins(0, 0, 0, 0)
+        middle_layout.setSpacing(0)
+        
+        # Toolbar pro střední panel (nad soubory)
+        middle_toolbar = QToolBar()
+        middle_toolbar.setOrientation(Qt.Orientation.Horizontal)
+        middle_toolbar.setFloatable(False)
+        middle_toolbar.setMovable(False)
+        
+        # Navigační tlačítka v toolbaru
+        back_action = QAction("◀ Zpět", self)
+        back_action.setEnabled(False)
+        back_action.triggered.connect(self.go_back)
+        middle_toolbar.addAction(back_action)
+        
+        forward_action = QAction("Vpřed ▶", self)
+        forward_action.setEnabled(False)
+        forward_action.triggered.connect(self.go_forward)
+        middle_toolbar.addAction(forward_action)
+        
+        up_action = QAction("↑ Nahoru", self)
+        up_action.triggered.connect(self.go_up)
+        middle_toolbar.addAction(up_action)
+        
+        refresh_action = QAction("🔄 Obnovit", self)
+        refresh_action.triggered.connect(self.refresh_current_view)
+        middle_toolbar.addAction(refresh_action)
+        
+        middle_toolbar.addSeparator()
+        
+        # Akce pro novou složku
+        new_folder_action = QAction("📁 Nová složka", self)
+        new_folder_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
+        new_folder_action.triggered.connect(self.create_new_folder)
+        middle_toolbar.addAction(new_folder_action)
+        
+        # Akce pro novou záložku
+        new_tab_action = QAction("🔖 Nová záložka", self)
+        new_tab_action.setShortcut(QKeySequence("Ctrl+T"))
+        new_tab_action.triggered.connect(self.create_new_tab_current_path)
+        middle_toolbar.addAction(new_tab_action)
+        
+        middle_toolbar.addSeparator()
+        
+        # Přepínání zobrazení
+        view_action = QAction("🔄 Přepnout zobrazení", self)
+        view_action.triggered.connect(self.toggle_view_mode)
+        middle_toolbar.addAction(view_action)
+        
+        # Přepínání informačního panelu
+        info_panel_action = QAction("ℹ️ Informační panel", self)
+        info_panel_action.setShortcut(QKeySequence("Ctrl+I"))
+        info_panel_action.triggered.connect(self.toggle_info_panel)
+        middle_toolbar.addAction(info_panel_action)
+        
+        # Přidání toolbaru do středního panelu
+        middle_layout.addWidget(middle_toolbar)
         
         # Tabulkové zobrazení s upravenými řádky
         table_view = QTableView()
@@ -671,16 +712,23 @@ class FileBrowserMainWindow(QMainWindow):
         
         middle_layout.addWidget(view_container)
         
+        # Pravý panel pouze s informačním panelem
+        right_panel = QWidget()
+        right_layout = QVBoxLayout(right_panel)
+        right_layout.setContentsMargins(0, 0, 0, 0)
+        right_layout.setSpacing(0)
+        
         # Informační panel (pravý panel)
         info_panel = FileInfoPanel()
         info_panel.set_file_model(self.file_model)
+        right_layout.addWidget(info_panel)
         
         splitter.addWidget(tree_view)
         splitter.addWidget(middle_widget)
-        splitter.addWidget(info_panel)
+        splitter.addWidget(right_panel)
         splitter.setStretchFactor(0, 0)  # Pevná šířka pro tree view
         splitter.setStretchFactor(1, 1)  # Rozšiřitelná šířka pro view
-        splitter.setStretchFactor(2, 0)  # Pevná šířka pro info panel
+        splitter.setStretchFactor(2, 0)  # Pevná šířka pro pravý panel
         
         tab_layout.addWidget(splitter)
         
@@ -700,6 +748,11 @@ class FileBrowserMainWindow(QMainWindow):
             'splitter': splitter,
             'navigation_history': NavigationHistory(),  # Každá záložka má svou historii
             'info_panel': info_panel,  # Informační panel
+            'right_panel': right_panel,  # Pravý panel
+            'middle_toolbar': middle_toolbar,  # Toolbar ve středním panelu
+            'back_action': back_action,  # Akce Zpět
+            'forward_action': forward_action,  # Akce Vpřed
+            'up_action': up_action,  # Akce Nahoru
             'middle_widget': middle_widget
         }
         
@@ -881,34 +934,9 @@ class FileBrowserMainWindow(QMainWindow):
         help_menu.addAction(about_action)
     
     def create_toolbar(self):
-        """Vytvoří toolbar s akcemi"""
-        toolbar = QToolBar()
-        self.addToolBar(toolbar)
-        
-        # Akce pro novou složku
-        new_folder_action = QAction("📁 Nová složka", self)
-        new_folder_action.setShortcut(QKeySequence("Ctrl+Shift+N"))
-        new_folder_action.triggered.connect(self.create_new_folder)
-        toolbar.addAction(new_folder_action)
-        
-        # Akce pro novou záložku
-        new_tab_action = QAction("🔖 Nová záložka", self)
-        new_tab_action.setShortcut(QKeySequence("Ctrl+T"))
-        new_tab_action.triggered.connect(self.create_new_tab_current_path)
-        toolbar.addAction(new_tab_action)
-        
-        toolbar.addSeparator()
-        
-        # Přepínání zobrazení
-        view_action = QAction("🔄 Přepnout zobrazení", self)
-        view_action.triggered.connect(self.toggle_view_mode)
-        toolbar.addAction(view_action)
-        
-        # Přepínání informačního panelu
-        info_panel_action = QAction("ℹ️ Informační panel", self)
-        info_panel_action.setShortcut(QKeySequence("Ctrl+I"))
-        info_panel_action.triggered.connect(self.toggle_info_panel)
-        toolbar.addAction(info_panel_action)
+        """Toolbar je nyní přesunut do pravého panelu každé záložky"""
+        # Toolbar je nyní v pravém panelu každé záložky, takže zde není potřeba žádný globální toolbar
+        pass
     
     def navigate_to_path(self, path: str):
         """Naviguje na zadanou cestu v aktuální záložce"""
@@ -916,17 +944,14 @@ class FileBrowserMainWindow(QMainWindow):
         self.navigate_to_path_in_tab(path, current_tab)
     
     def update_navigation_buttons(self):
-        """Aktualizuje stav navigačních tlačítek"""
+        """Aktualizuje stav navigačních tlačítek v toolbaru aktuální záložky"""
         tab_data = self.get_current_tab_data()
         if tab_data:
             nav_history = tab_data['navigation_history']
-            self.back_button.setEnabled(nav_history.can_go_back())
-            self.forward_button.setEnabled(nav_history.can_go_forward())
-            self.up_button.setEnabled(os.path.dirname(self.current_path) != self.current_path)
-        else:
-            self.back_button.setEnabled(False)
-            self.forward_button.setEnabled(False)
-            self.up_button.setEnabled(False)
+            # Aktualizace akcí v toolbaru záložky
+            tab_data['back_action'].setEnabled(nav_history.can_go_back())
+            tab_data['forward_action'].setEnabled(nav_history.can_go_forward())
+            tab_data['up_action'].setEnabled(os.path.dirname(self.current_path) != self.current_path)
     
     def go_back(self):
         """Jde na předchozí cestu v historii aktuální záložky"""
