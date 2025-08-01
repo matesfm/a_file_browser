@@ -1390,7 +1390,7 @@ Změněno: {modified}"""
 <h2>FlexiFiles</h2>
 <h3>Profesionální správce souborů</h3>
 
-<p><b>Verze:</b> 1.0.0</p>
+<p><b>Verze:</b> 4.1 (Fixed)</p>
 <p><b>Datum:</b> Srpen 2025</p>
 
 <h4>🌟 Funkce:</h4>
