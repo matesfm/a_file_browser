@@ -16,6 +16,10 @@ import sys
 import os
 import shutil
 import subprocess
+import os
+import sys
+import shutil
+import subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
@@ -464,6 +468,60 @@ class FileBrowserMainWindow(QMainWindow):
         
         # Načtení výchozí cesty už se děje v create_new_tab
         # self.navigate_to_path(self.current_path)
+    
+    def get_version_info(self):
+        """Získá informace o verzi z Git repozitáře"""
+        try:
+            # Získání počtu commitů
+            result = subprocess.run(['git', 'rev-list', '--count', 'HEAD'], 
+                                  capture_output=True, text=True, cwd=os.path.dirname(__file__))
+            if result.returncode == 0:
+                commit_count = int(result.stdout.strip())
+                major = commit_count // 10  # Každých 10 commitů = nová major verze
+                minor = commit_count % 10   # Zbytek = minor verze
+                
+                # Získání hash posledního commitu
+                hash_result = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'], 
+                                           capture_output=True, text=True, cwd=os.path.dirname(__file__))
+                git_hash = hash_result.stdout.strip() if hash_result.returncode == 0 else "unknown"
+                
+                # Získání data posledního commitu
+                date_result = subprocess.run(['git', 'log', '-1', '--format=%cd', '--date=short'], 
+                                           capture_output=True, text=True, cwd=os.path.dirname(__file__))
+                commit_date = date_result.stdout.strip() if date_result.returncode == 0 else "unknown"
+                
+                # Kontrola, zda jsou nějaké změny
+                status_result = subprocess.run(['git', 'status', '--porcelain'], 
+                                             capture_output=True, text=True, cwd=os.path.dirname(__file__))
+                has_changes = bool(status_result.stdout.strip()) if status_result.returncode == 0 else False
+                
+                version = f"{major}.{minor}"
+                if has_changes:
+                    version += "-dev"
+                    
+                return {
+                    'version': version,
+                    'git_hash': git_hash,
+                    'commit_date': commit_date,
+                    'commit_count': commit_count,
+                    'has_changes': has_changes
+                }
+            else:
+                return self.get_fallback_version()
+                
+        except Exception as e:
+            print(f"Chyba při získávání Git informací: {e}")
+            return self.get_fallback_version()
+    
+    def get_fallback_version(self):
+        """Náhradní verze pokud Git není dostupný"""
+        return {
+            'version': '4.1-standalone',
+            'git_hash': 'unknown',
+            'commit_date': 'unknown',
+            'commit_count': 0,
+            'has_changes': False
+        }
     
     def set_application_icon(self):
         """Nastaví ikonu aplikace"""
@@ -1386,12 +1444,24 @@ Změněno: {modified}"""
     
     def show_about(self):
         """Zobrazí informace o aplikaci"""
-        about_text = """
+        version_info = self.get_version_info()
+        
+        # Sestavení detailních informací o verzi
+        version_details = f"Verze: {version_info['version']}"
+        if version_info['git_hash'] != 'unknown':
+            version_details += f" (git: {version_info['git_hash']})"
+        if version_info['has_changes']:
+            version_details += " - obsahuje neuložené změny"
+            
+        build_date = version_info['commit_date'] if version_info['commit_date'] != 'unknown' else datetime.now().strftime("%Y-%m-%d")
+        
+        about_text = f"""
 <h2>FlexiFiles</h2>
 <h3>Profesionální správce souborů</h3>
 
-<p><b>Verze:</b> 4.1 (Fixed)</p>
-<p><b>Datum:</b> Srpen 2025</p>
+<p><b>{version_details}</b></p>
+<p><b>Datum buildu:</b> {build_date}</p>
+<p><b>Počet commitů:</b> {version_info['commit_count']}</p>
 
 <h4>🌟 Funkce:</h4>
 <ul>
